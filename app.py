@@ -129,7 +129,7 @@ def run(audio_path):
 
     # 2. get completion
     audio_tensor = get_completion(encoded_prompt_audio, prompt_len)
-    audio_np = transform(pletion).numpy()
+    audio_np = audio_tensor.numpy()
     audio_tensor = audio_tensor.cpu().squeeze()
     if audio_tensor.ndim == 1:
         audio_tensor = audio_tensor.unsqueeze(0)
