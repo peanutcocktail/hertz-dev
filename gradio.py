@@ -125,6 +125,6 @@ def get_completion(encoded_prompt_audio, prompt_len):
 
 num_completions = 10
 print_colored(f"Generating {num_completions} completions...", "blue")
-for _ in range(num_completions):
+for i in range(num_completions):
     completion = get_completion(encoded_prompt_audio, prompt_len)
-    save_audio(completion, "output2.wav")
+    save_audio(completion, f"{i}.wav")
