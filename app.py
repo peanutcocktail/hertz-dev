@@ -28,18 +28,14 @@ TWO_SPEAKER = True
 USE_PURE_AUDIO_ABLATION = False # We trained a base model with no text initialization at all. Toggle this to enable it.
 assert not (USE_PURE_AUDIO_ABLATION and TWO_SPEAKER) # We only have a single-speaker version of this model.
 
-model_config = get_hertz_dev_config(is_split=TWO_SPEAKER, use_pure_audio_ablation=USE_PURE_AUDIO_ABLATION)
 
-generator = model_config()
-generator = generator.eval().to(T.bfloat16).to(device)
-
-def load_and_preprocess_audio(audio_path):
+def load_and_preprocess_audio(audio_path, speakers):
     print_colored("Loading and preprocessing audio...", "blue", bold=True)
     # Load audio file
     audio_tensor, sr = torchaudio.load(audio_path)
     print_colored(f"Loaded audio shape: {audio_tensor.shape}", "grey")
 
-    if TWO_SPEAKER:
+    if speakers == 2:
         if audio_tensor.shape[0] == 1:
             print_colored("Converting mono to stereo...", "grey")
             audio_tensor = audio_tensor.repeat(2, 1)
@@ -72,7 +68,14 @@ def load_and_preprocess_audio(audio_path):
 #prompt_audio = load_and_preprocess_audio('./prompts/toaskanymore.wav')
 
 
-def get_completion(encoded_prompt_audio, prompt_len, gen_len):
+def get_completion(encoded_prompt_audio, prompt_len, gen_len, speakers):
+
+    TWO_SPEAKER = (speakers == 2)
+    model_config = get_hertz_dev_config(is_split=TWO_SPEAKER, use_pure_audio_ablation=USE_PURE_AUDIO_ABLATION)
+    generator = model_config()
+    generator = generator.eval().to(T.bfloat16).to(device)
+
+
     prompt_len_seconds = prompt_len / 8
     print_colored(f"Prompt length: {prompt_len_seconds:.2f}s", "grey")
     print_colored("Completing audio...", "blue")
@@ -114,7 +117,7 @@ def get_completion(encoded_prompt_audio, prompt_len, gen_len):
 
 def run(audio_path, prompt_len_seconds, gen_len, speakers):
     # 1. encode audio
-    prompt_audio = load_and_preprocess_audio(audio_path)
+    prompt_audio = load_and_preprocess_audio(audio_path, speakers)
 #    save_audio(prompt_audio, "output1.wav")
 #    prompt_len_seconds = 3
     prompt_len = prompt_len_seconds * 8
@@ -130,7 +133,7 @@ def run(audio_path, prompt_len_seconds, gen_len, speakers):
     print_colored("Prompt encoded successfully!", "green")
 
     # 2. get completion
-    audio_tensor = get_completion(encoded_prompt_audio, prompt_len, gen_len * 8)
+    audio_tensor = get_completion(encoded_prompt_audio, prompt_len, gen_len * 8, speakers)
     audio_np = audio_tensor.numpy()
     audio_tensor = audio_tensor.cpu().squeeze()
     if audio_tensor.ndim == 1:
