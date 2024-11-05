@@ -110,7 +110,7 @@ def get_completion(encoded_prompt_audio, prompt_len):
 #    completion = get_completion(encoded_prompt_audio, prompt_len)
 #    save_audio(completion, f"{i}.wav")
 
-def run(audio_path):
+def run(audio_path, prompt_len_seconds):
     # 1. encode audio
     prompt_audio = load_and_preprocess_audio(audio_path)
 #    save_audio(prompt_audio, "output1.wav")
@@ -148,13 +148,15 @@ def run(audio_path):
 
 with gr.Blocks() as demo:
     with gr.Row():
-      audio = gr.Audio(label="Reference Audio", type="filepath")
-      generated = gr.Audio(label="Generated", type="filepath", interactive=False)
+        with gr.Colum():
+            audio = gr.Audio(label="Reference Audio", type="filepath")
+            prompt_len_seconds = gr.Number(label="Continue from first N seconds")
+        generated = gr.Audio(label="Generated", type="filepath", interactive=False)
     button = gr.Button("Generate")
     button.click(
-      fn=run,
-      inputs=[audio],
-      outputs=[generated]
+        fn=run,
+        inputs=[audio, prompt_len_seconds],
+        outputs=[generated]
     )
     
 demo.launch()
