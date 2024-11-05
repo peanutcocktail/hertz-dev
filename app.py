@@ -136,8 +136,8 @@ def run(audio_path):
     audio_tensor = audio_tensor.float()
 #    audio_np = audio_tensor.numpy()
 
-    torchaudio.save("generated.mp4", audio_tensor, 16000)
-    return "generated.mp4"
+    torchaudio.save("generated.wav", audio_tensor, 16000)
+    return "generated.wav"
 
 
 
@@ -149,7 +149,7 @@ def run(audio_path):
 with gr.Blocks() as demo:
     with gr.Row():
       audio = gr.Audio(label="Reference Audio", type="filepath")
-      generated = gr.Audio(label="Generated", interactive=False)
+      generated = gr.Audio(label="Generated", type="filepath", interactive=False)
     button = gr.Button("Generate")
     button.click(
       fn=run,
