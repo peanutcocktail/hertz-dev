@@ -148,7 +148,7 @@ def run(audio_path, prompt_len_seconds):
 
 with gr.Blocks() as demo:
     with gr.Row():
-        with gr.Colum():
+        with gr.Column():
             audio = gr.Audio(label="Reference Audio", type="filepath")
             prompt_len_seconds = gr.Number(label="Continue from first N seconds")
         generated = gr.Audio(label="Generated", type="filepath", interactive=False)
