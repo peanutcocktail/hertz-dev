@@ -112,15 +112,15 @@ def get_completion(encoded_prompt_audio, prompt_len, gen_len):
 #    completion = get_completion(encoded_prompt_audio, prompt_len)
 #    save_audio(completion, f"{i}.wav")
 
-def run(audio_path, prompt_len_seconds, gen_len):
+def run(audio_path, prompt_len_seconds, gen_len, speakers):
     # 1. encode audio
     prompt_audio = load_and_preprocess_audio(audio_path)
 #    save_audio(prompt_audio, "output1.wav")
-    prompt_len_seconds = 3
+#    prompt_len_seconds = 3
     prompt_len = prompt_len_seconds * 8
     print_colored("Encoding prompt...", "blue")
     with T.autocast(device_type='cuda', dtype=T.bfloat16):
-        if TWO_SPEAKER:
+        if speakers == 2:
             encoded_prompt_audio_ch1 = audio_tokenizer.latent_from_data(prompt_audio[:, 0:1].to(device))
             encoded_prompt_audio_ch2 = audio_tokenizer.latent_from_data(prompt_audio[:, 1:2].to(device))
             encoded_prompt_audio = T.cat([encoded_prompt_audio_ch1, encoded_prompt_audio_ch2], dim=-1)
@@ -154,11 +154,12 @@ with gr.Blocks() as demo:
             audio = gr.Audio(label="Reference Audio", type="filepath")
             prompt_len_seconds = gr.Number(label="Continue from first N seconds", value=3)
             gen_len = gr.Number(label="Continue from first N seconds", value=20)
+            speakers = gr.Radio(label="Speakers", choices=[1,2], value=1)
         generated = gr.Audio(label="Generated", type="filepath", interactive=False)
     button = gr.Button("Generate")
     button.click(
         fn=run,
-        inputs=[audio, prompt_len_seconds, gen_len],
+        inputs=[audio, prompt_len_seconds, gen_len, speakers],
         outputs=[generated]
     )
     
