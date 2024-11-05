@@ -76,7 +76,7 @@ def save_audio(audio_tensor, filename):
 
 # Our model is very prompt-sensitive, so we recommend experimenting with a diverse set of prompts.
 #prompt_audio = load_and_preprocess_audio('./prompts/toaskanymore.wav')
-prompt_audio = load_and_preprocess_audio('./prompts/bob_duo.wav")
+prompt_audio = load_and_preprocess_audio("./prompts/bob_duo.wav")
 save_audio(prompt_audio, "output1.wav")
 prompt_len_seconds = 3
 prompt_len = prompt_len_seconds * 8
