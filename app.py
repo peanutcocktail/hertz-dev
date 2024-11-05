@@ -115,12 +115,14 @@ def get_completion(encoded_prompt_audio, prompt_len, gen_len, speakers):
 #    completion = get_completion(encoded_prompt_audio, prompt_len)
 #    save_audio(completion, f"{i}.wav")
 
-def run(audio_path, prompt_len_seconds, gen_len, speakers):
+def run(audio_path, prompt_len_seconds, gen_len_seconds, speakers):
     # 1. encode audio
     prompt_audio = load_and_preprocess_audio(audio_path, speakers)
 #    save_audio(prompt_audio, "output1.wav")
 #    prompt_len_seconds = 3
     prompt_len = prompt_len_seconds * 8
+    gen_len = gen_len_seconds * 8
+    print(f"prompt_len={prompt_len}, gen_len={gen_len}")
     print_colored("Encoding prompt...", "blue")
     with T.autocast(device_type='cuda', dtype=T.bfloat16):
         if speakers == 2:
@@ -133,7 +135,7 @@ def run(audio_path, prompt_len_seconds, gen_len, speakers):
     print_colored("Prompt encoded successfully!", "green")
 
     # 2. get completion
-    audio_tensor = get_completion(encoded_prompt_audio, prompt_len, gen_len * 8, speakers)
+    audio_tensor = get_completion(encoded_prompt_audio, prompt_len, gen_len, speakers)
     audio_np = audio_tensor.numpy()
     audio_tensor = audio_tensor.cpu().squeeze()
     if audio_tensor.ndim == 1:
