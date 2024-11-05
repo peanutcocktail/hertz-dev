@@ -7,7 +7,7 @@ from tokenizer import make_tokenizer
 from model import get_hertz_dev_config
 import matplotlib.pyplot as plt
 from IPython.display import Audio, display
-
+import gradio as gr
 
 # If you get an error like "undefined symbol: __nvJitLinkComplete_12_4, version libnvJitLink.so.12",
 # you need to install PyTorch with the correct CUDA version. Run:
@@ -66,32 +66,11 @@ def load_and_preprocess_audio(audio_path):
     print_colored("Audio preprocessing complete!", "green")
     return audio_tensor.unsqueeze(0)
 
-def save_audio(audio_tensor, filename):
 
-    audio_tensor = audio_tensor.cpu().squeeze()
-    if audio_tensor.ndim == 1:
-        audio_tensor = audio_tensor.unsqueeze(0)
-    audio_tensor = audio_tensor.float()
-    torchaudio.save(filename, audio_tensor, 16000)
 
 # Our model is very prompt-sensitive, so we recommend experimenting with a diverse set of prompts.
 #prompt_audio = load_and_preprocess_audio('./prompts/toaskanymore.wav')
-prompt_audio = load_and_preprocess_audio("./prompts/bob_duo.wav")
-save_audio(prompt_audio, "output1.wav")
-prompt_len_seconds = 3
-prompt_len = prompt_len_seconds * 8
 
-
-print_colored("Encoding prompt...", "blue")
-with T.autocast(device_type='cuda', dtype=T.bfloat16):
-    if TWO_SPEAKER:
-        encoded_prompt_audio_ch1 = audio_tokenizer.latent_from_data(prompt_audio[:, 0:1].to(device))
-        encoded_prompt_audio_ch2 = audio_tokenizer.latent_from_data(prompt_audio[:, 1:2].to(device))
-        encoded_prompt_audio = T.cat([encoded_prompt_audio_ch1, encoded_prompt_audio_ch2], dim=-1)
-    else:
-        encoded_prompt_audio = audio_tokenizer.latent_from_data(prompt_audio.to(device))
-print_colored(f"Encoded prompt shape: {encoded_prompt_audio.shape}", "grey")
-print_colored("Prompt encoded successfully!", "green")
 
 def get_completion(encoded_prompt_audio, prompt_len):
     prompt_len_seconds = prompt_len / 8
@@ -125,8 +104,53 @@ def get_completion(encoded_prompt_audio, prompt_len):
 
     return audio_tensor[:, max(prompt_len*2000 - 16000, 0):]
 
-num_completions = 10
-print_colored(f"Generating {num_completions} completions...", "blue")
-for i in range(num_completions):
-    completion = get_completion(encoded_prompt_audio, prompt_len)
-    save_audio(completion, f"{i}.wav")
+#num_completions = 10
+#print_colored(f"Generating {num_completions} completions...", "blue")
+#for i in range(num_completions):
+#    completion = get_completion(encoded_prompt_audio, prompt_len)
+#    save_audio(completion, f"{i}.wav")
+
+def run(audio_path):
+    # 1. encode audio
+    prompt_audio = load_and_preprocess_audio(audio_path)
+#    save_audio(prompt_audio, "output1.wav")
+    prompt_len_seconds = 3
+    prompt_len = prompt_len_seconds * 8
+    print_colored("Encoding prompt...", "blue")
+    with T.autocast(device_type='cuda', dtype=T.bfloat16):
+        if TWO_SPEAKER:
+            encoded_prompt_audio_ch1 = audio_tokenizer.latent_from_data(prompt_audio[:, 0:1].to(device))
+            encoded_prompt_audio_ch2 = audio_tokenizer.latent_from_data(prompt_audio[:, 1:2].to(device))
+            encoded_prompt_audio = T.cat([encoded_prompt_audio_ch1, encoded_prompt_audio_ch2], dim=-1)
+        else:
+            encoded_prompt_audio = audio_tokenizer.latent_from_data(prompt_audio.to(device))
+    print_colored(f"Encoded prompt shape: {encoded_prompt_audio.shape}", "grey")
+    print_colored("Prompt encoded successfully!", "green")
+
+    # 2. get completion
+    audio_tensor = get_completion(encoded_prompt_audio, prompt_len)
+    audio_np = transform(pletion).numpy()
+    audio_tensor = audio_tensor.cpu().squeeze()
+    if audio_tensor.ndim == 1:
+        audio_tensor = audio_tensor.unsqueeze(0)
+    audio_tensor = audio_tensor.float()
+    audio_np = audio_tensor.numpy()
+
+
+
+    sample_rate = 16000
+    return sample_rate, audio_np
+
+  
+
+with gr.Blocks() as demo:
+    audio = gr.Audio(label="Reference Audio")
+    generated = gr.Audio(label="Generated", interactive=False)
+    button = gr.Button("Generate")
+    button.click(
+      fn=run,
+      inputs=[audio],
+      outputs=[generated]
+    )
+    
+demo.launch()

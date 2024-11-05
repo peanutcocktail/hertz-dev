@@ -12,3 +12,4 @@ matplotlib
 fastapi
 uvicorn
 argparse
+gradio
