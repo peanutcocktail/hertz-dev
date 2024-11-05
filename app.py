@@ -137,9 +137,10 @@ def run(audio_path):
     audio_np = audio_tensor.numpy()
 
 
+    return audio_np
 
-    sample_rate = 16000
-    return sample_rate, audio_np
+#    sample_rate = 16000
+#    return sample_rate, audio_np
 
   
 
