@@ -79,6 +79,8 @@ def get_completion(encoded_prompt_audio, prompt_len, gen_len, speakers):
     prompt_len_seconds = prompt_len / 8
     print_colored(f"Prompt length: {prompt_len_seconds:.2f}s", "grey")
     print_colored("Completing audio...", "blue")
+    encoded_prompt_audio = encoded_prompt_audio[:, :prompt_len]
+
     with T.autocast(device_type='cuda', dtype=T.bfloat16):
         completed_audio_batch = generator.completion(
             encoded_prompt_audio,
