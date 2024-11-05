@@ -130,7 +130,7 @@ def run(audio_path, prompt_len_seconds, gen_len):
     print_colored("Prompt encoded successfully!", "green")
 
     # 2. get completion
-    audio_tensor = get_completion(encoded_prompt_audio, prompt_len, gen_len)
+    audio_tensor = get_completion(encoded_prompt_audio, prompt_len, gen_len * 8)
     audio_np = audio_tensor.numpy()
     audio_tensor = audio_tensor.cpu().squeeze()
     if audio_tensor.ndim == 1:
