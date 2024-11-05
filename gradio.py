@@ -23,7 +23,8 @@ audio_tokenizer = make_tokenizer(device)
 
 # We have different checkpoints for the single-speaker and two-speaker models
 # Set to True to load and run inference with the two-speaker model
-TWO_SPEAKER = False
+#TWO_SPEAKER = False
+TWO_SPEAKER = True
 USE_PURE_AUDIO_ABLATION = False # We trained a base model with no text initialization at all. Toggle this to enable it.
 assert not (USE_PURE_AUDIO_ABLATION and TWO_SPEAKER) # We only have a single-speaker version of this model.
 
@@ -74,7 +75,8 @@ def save_audio(audio_tensor, filename):
     torchaudio.save(filename, audio_tensor, 16000)
 
 # Our model is very prompt-sensitive, so we recommend experimenting with a diverse set of prompts.
-prompt_audio = load_and_preprocess_audio('./prompts/toaskanymore.wav')
+#prompt_audio = load_and_preprocess_audio('./prompts/toaskanymore.wav')
+prompt_audio = load_and_preprocess_audio('./prompts/bob_duo.wav")
 save_audio(prompt_audio, "output1.wav")
 prompt_len_seconds = 3
 prompt_len = prompt_len_seconds * 8
