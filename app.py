@@ -72,7 +72,7 @@ def load_and_preprocess_audio(audio_path):
 #prompt_audio = load_and_preprocess_audio('./prompts/toaskanymore.wav')
 
 
-def get_completion(encoded_prompt_audio, prompt_len):
+def get_completion(encoded_prompt_audio, prompt_len, gen_len):
     prompt_len_seconds = prompt_len / 8
     print_colored(f"Prompt length: {prompt_len_seconds:.2f}s", "grey")
     print_colored("Completing audio...", "blue")
@@ -80,7 +80,9 @@ def get_completion(encoded_prompt_audio, prompt_len):
         completed_audio_batch = generator.completion(
             encoded_prompt_audio,
             temps=(.8, (0.5, 0.1)), # (token_temp, (categorical_temp, gaussian_temp))
-            use_cache=True)
+            use_cache=True,
+            gen_len=gen_len
+        )
 
         completed_audio = completed_audio_batch
         print_colored(f"Decoding completion...", "blue")
@@ -110,7 +112,7 @@ def get_completion(encoded_prompt_audio, prompt_len):
 #    completion = get_completion(encoded_prompt_audio, prompt_len)
 #    save_audio(completion, f"{i}.wav")
 
-def run(audio_path, prompt_len_seconds):
+def run(audio_path, prompt_len_seconds, gen_len):
     # 1. encode audio
     prompt_audio = load_and_preprocess_audio(audio_path)
 #    save_audio(prompt_audio, "output1.wav")
@@ -128,7 +130,7 @@ def run(audio_path, prompt_len_seconds):
     print_colored("Prompt encoded successfully!", "green")
 
     # 2. get completion
-    audio_tensor = get_completion(encoded_prompt_audio, prompt_len)
+    audio_tensor = get_completion(encoded_prompt_audio, prompt_len, gen_len)
     audio_np = audio_tensor.numpy()
     audio_tensor = audio_tensor.cpu().squeeze()
     if audio_tensor.ndim == 1:
@@ -150,12 +152,13 @@ with gr.Blocks() as demo:
     with gr.Row():
         with gr.Column():
             audio = gr.Audio(label="Reference Audio", type="filepath")
-            prompt_len_seconds = gr.Number(label="Continue from first N seconds")
+            prompt_len_seconds = gr.Number(label="Continue from first N seconds", value=3)
+            gen_len = gr.Number(label="Continue from first N seconds", value=20)
         generated = gr.Audio(label="Generated", type="filepath", interactive=False)
     button = gr.Button("Generate")
     button.click(
         fn=run,
-        inputs=[audio, prompt_len_seconds],
+        inputs=[audio, prompt_len_seconds, gen_len],
         outputs=[generated]
     )
     
