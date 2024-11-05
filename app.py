@@ -130,15 +130,19 @@ def run(audio_path):
     # 2. get completion
     audio_tensor = get_completion(encoded_prompt_audio, prompt_len)
     audio_np = audio_tensor.numpy()
-#    audio_tensor = audio_tensor.cpu().squeeze()
-#    if audio_tensor.ndim == 1:
-#        audio_tensor = audio_tensor.unsqueeze(0)
-##    audio_tensor = audio_tensor.float()
+    audio_tensor = audio_tensor.cpu().squeeze()
+    if audio_tensor.ndim == 1:
+        audio_tensor = audio_tensor.unsqueeze(0)
+    audio_tensor = audio_tensor.float()
 #    audio_np = audio_tensor.numpy()
 
+    torchaudio.save("generated.mp4", audio_tensor, 16000)
+    return "generated.mp4"
 
-    sample_rate = 16000
-    return (sample_rate, audio_np)
+
+
+#    sample_rate = 16000
+#    return (sample_rate, audio_np)
 
   
 
