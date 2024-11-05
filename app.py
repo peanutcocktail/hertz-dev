@@ -144,8 +144,9 @@ def run(audio_path):
   
 
 with gr.Blocks() as demo:
-    audio = gr.Audio(label="Reference Audio")
-    generated = gr.Audio(label="Generated", interactive=False)
+    with gr.Row():
+      audio = gr.Audio(label="Reference Audio", type="filepath")
+      generated = gr.Audio(label="Generated", interactive=False)
     button = gr.Button("Generate")
     button.click(
       fn=run,
