@@ -151,15 +151,17 @@ def run(audio_path, prompt_len_seconds, gen_len_seconds, speakers, token_temp, c
 
 with gr.Blocks() as demo:
     with gr.Row():
-        with gr.Group():
-            audio = gr.Audio(label="Reference Audio", type="filepath")
-            prompt_len_seconds = gr.Number(label="Continue from N sec", value=3)
-            gen_len = gr.Number(label="Generate N seconds", value=10)
-            speakers = gr.Radio(label="Number of Speakers", choices=[1,2], value=1)
-            token_temp = gr.Number(label="token temperature", value=0.8)
-            categorical_temp = gr.Number(label="categorical temperature", value=0.8)
-            gaussian_temp = gr.Number(label="gaussian temperature", value=0.8)
-        generated = gr.Audio(label="Generated", type="filepath", interactive=False)
+        with gr.Column():
+            with gr.Group():
+                audio = gr.Audio(label="Reference Audio", type="filepath")
+                prompt_len_seconds = gr.Number(label="Continue from N sec", value=3)
+                gen_len = gr.Number(label="Generate N seconds", value=10)
+                speakers = gr.Radio(label="Number of Speakers", choices=[1,2], value=1)
+                token_temp = gr.Number(label="token temperature", value=0.8)
+                categorical_temp = gr.Number(label="categorical temperature", value=0.8)
+                gaussian_temp = gr.Number(label="gaussian temperature", value=0.8)
+        with gr.Column():
+            generated = gr.Audio(label="Generated", type="filepath", interactive=False)
     button = gr.Button("Generate")
     button.click(
         fn=run,
