@@ -112,17 +112,9 @@ def get_completion(encoded_prompt_audio, prompt_len, gen_len, speakers):
     #return audio_tensor[:, max(prompt_len*2000 - 16000, 0):]
     return audio_tensor
 
-#num_completions = 10
-#print_colored(f"Generating {num_completions} completions...", "blue")
-#for i in range(num_completions):
-#    completion = get_completion(encoded_prompt_audio, prompt_len)
-#    save_audio(completion, f"{i}.wav")
-
 def run(audio_path, prompt_len_seconds, gen_len_seconds, speakers):
     # 1. encode audio
     prompt_audio = load_and_preprocess_audio(audio_path, speakers)
-#    save_audio(prompt_audio, "output1.wav")
-#    prompt_len_seconds = 3
     prompt_len = prompt_len_seconds * 8
     gen_len = gen_len_seconds * 8
     print(f"prompt_len={prompt_len}, gen_len={gen_len}")
@@ -160,9 +152,9 @@ with gr.Blocks() as demo:
     with gr.Row():
         with gr.Column():
             audio = gr.Audio(label="Reference Audio", type="filepath")
-            prompt_len_seconds = gr.Number(label="Continue from first N seconds", value=3)
-            gen_len = gr.Number(label="Continue from first N seconds", value=20)
-            speakers = gr.Radio(label="Speakers", choices=[1,2], value=1)
+            prompt_len_seconds = gr.Number(label="Continue from N sec", value=3)
+            gen_len = gr.Number(label="Generate N seconds", value=10)
+            speakers = gr.Radio(label="Number of Speakers", choices=[1,2], value=1)
         generated = gr.Audio(label="Generated", type="filepath", interactive=False)
     button = gr.Button("Generate")
     button.click(
