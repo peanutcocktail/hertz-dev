@@ -68,7 +68,7 @@ def load_and_preprocess_audio(audio_path, speakers):
 #prompt_audio = load_and_preprocess_audio('./prompts/toaskanymore.wav')
 
 
-def get_completion(encoded_prompt_audio, prompt_len, gen_len, speakers):
+def get_completion(encoded_prompt_audio, prompt_len, gen_len, speakers, token_temp, categorical_temp, gaussian_temp):
 
     TWO_SPEAKER = (speakers == 2)
     model_config = get_hertz_dev_config(is_split=TWO_SPEAKER, use_pure_audio_ablation=USE_PURE_AUDIO_ABLATION)
@@ -84,7 +84,8 @@ def get_completion(encoded_prompt_audio, prompt_len, gen_len, speakers):
     with T.autocast(device_type='cuda', dtype=T.bfloat16):
         completed_audio_batch = generator.completion(
             encoded_prompt_audio,
-            temps=(.8, (0.5, 0.1)), # (token_temp, (categorical_temp, gaussian_temp))
+            temps=(token_temp, (categorical_temp, gaussian_temp)),
+            #temps=(.8, (0.5, 0.1)), # (token_temp, (categorical_temp, gaussian_temp))
             use_cache=True,
             gen_len=gen_len
         )
@@ -112,7 +113,7 @@ def get_completion(encoded_prompt_audio, prompt_len, gen_len, speakers):
     #return audio_tensor[:, max(prompt_len*2000 - 16000, 0):]
     return audio_tensor
 
-def run(audio_path, prompt_len_seconds, gen_len_seconds, speakers):
+def run(audio_path, prompt_len_seconds, gen_len_seconds, speakers, token_temp, categorical_temp, gaussian_temp):
     # 1. encode audio
     prompt_audio = load_and_preprocess_audio(audio_path, speakers)
     prompt_len = prompt_len_seconds * 8
@@ -130,7 +131,7 @@ def run(audio_path, prompt_len_seconds, gen_len_seconds, speakers):
     print_colored("Prompt encoded successfully!", "green")
 
     # 2. get completion
-    audio_tensor = get_completion(encoded_prompt_audio, prompt_len, gen_len, speakers)
+    audio_tensor = get_completion(encoded_prompt_audio, prompt_len, gen_len, speakers, token_temp, categorical_temp, gaussian_temp)
     audio_np = audio_tensor.numpy()
     audio_tensor = audio_tensor.cpu().squeeze()
     if audio_tensor.ndim == 1:
@@ -150,16 +151,19 @@ def run(audio_path, prompt_len_seconds, gen_len_seconds, speakers):
 
 with gr.Blocks() as demo:
     with gr.Row():
-        with gr.Column():
+        with gr.Group():
             audio = gr.Audio(label="Reference Audio", type="filepath")
             prompt_len_seconds = gr.Number(label="Continue from N sec", value=3)
             gen_len = gr.Number(label="Generate N seconds", value=10)
             speakers = gr.Radio(label="Number of Speakers", choices=[1,2], value=1)
+            token_temp = gr.Number(label="token temperature", value=0.8)
+            categorical_temp = gr.Number(label="categorical temperature", value=0.8)
+            gaussian_temp = gr.Number(label="gaussian temperature", value=0.8)
         generated = gr.Audio(label="Generated", type="filepath", interactive=False)
     button = gr.Button("Generate")
     button.click(
         fn=run,
-        inputs=[audio, prompt_len_seconds, gen_len, speakers],
+        inputs=[audio, prompt_len_seconds, gen_len, speakers, token_temp, categorical_temp, gaussian_temp],
         outputs=[generated]
     )
     
