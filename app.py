@@ -163,12 +163,12 @@ with gr.Blocks() as demo:
                     token_temp = gr.Number(label="token temperature", value=0.8)
                     categorical_temp = gr.Number(label="categorical temperature", value=0.4)
                     gaussian_temp = gr.Number(label="gaussian temperature", value=0.1)
-                button.click(
-                    fn=run,
-                    inputs=[audio, prompt_len_seconds, gen_len, speakers, token_temp, categorical_temp, gaussian_temp],
-                    outputs=[generated]
-                )
         with gr.Column():
             generated = gr.Audio(label="Generated", type="filepath", interactive=False)
+        button.click(
+            fn=run,
+            inputs=[audio, prompt_len_seconds, gen_len, speakers, token_temp, categorical_temp, gaussian_temp],
+            outputs=[generated]
+        )
     
 demo.launch()
