@@ -158,8 +158,8 @@ with gr.Blocks() as demo:
                 gen_len = gr.Number(label="Generate N seconds", value=10)
                 speakers = gr.Radio(label="Number of Speakers", choices=[1,2], value=1)
                 token_temp = gr.Number(label="token temperature", value=0.8)
-                categorical_temp = gr.Number(label="categorical temperature", value=0.8)
-                gaussian_temp = gr.Number(label="gaussian temperature", value=0.8)
+                categorical_temp = gr.Number(label="categorical temperature", value=0.4)
+                gaussian_temp = gr.Number(label="gaussian temperature", value=0.1)
         with gr.Column():
             generated = gr.Audio(label="Generated", type="filepath", interactive=False)
     button = gr.Button("Generate")
